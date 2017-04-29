@@ -1,0 +1,291 @@
+---
+title: "Introducción a R"
+output:
+  ioslides_presentation:
+    widescreen: yes
+date: "26 de abril de 2017"
+---
+
+
+## `R` 
+
+<div class="columns-2">
+
+### ¿Qu&eacute; es?     
+
+### ¿Qui&eacute;n lo usa?
+
+
+<img src="Rlogo.png" width="40%">
+
+
+</div>
+
+
+### Vamos a usar R + RStudio(IDE) :
+
+- https://cran.r-project.org/mirrors.html
+
+- https://www.rstudio.com/products/rstudio/
+
+# Cosas básicas
+
+## Asignaci&oacute;n
+
+```{r }
+r1 <- 1
+r2 = 2
+
+# Si pongo una variable sin ninguna operacion se imprime en pantalla
+r1 
+r2
+```
+
+Una vez que una variable se crea, "vive" en la sesión salvo que la borre con `rm`
+
+## Tipos de datos 
+
+### numeric/double
+
+operaciones: +, - , *, /, ^, sqrt(.), exp(.), log(.), etc. 
+
+```{r }
+area1 <- 2 * pi * r1
+
+area1
+```
+
+### logical (TRUE/FALSE)
+
+```{r }
+bool1 <- (area1 == 2)
+
+(TRUE && (2 < 1)) || TRUE
+```
+
+## Tipos de datos 
+
+### character
+
+```{r }
+palabra1 <- "probando"
+palabra2 <- "hola"
+
+paste(palabra1,palabra1,palabra2,sep=", ") # concatenar caracteres con separador
+```
+
+### missing
+
+```{r}
+varmissing<- NA
+is.na(varmissing)
+```
+
+## Tipos de datos 
+
+### vector 
+
+```{r}
+vector1 <- c(1, 5, 9, -1, 4)
+vector1
+vector2 <- seq(1, 2, 0.5)
+vector2
+vector3 <- rep(5, 7)
+vector3
+```
+
+## Tipos de datos: vector {.build}
+
+<center><img src="quoraR2.png" width="90%"></center>
+
+
+<center>porque indexa desde 1</center>
+
+
+## Tipos de datos: vector1=`r vector1` {.build}
+
+```{r}
+vector1[c(1,2)] 
+c(vector1,c(1,2)) 
+vector1[-2] 
+```
+
+operaciones: +, -, *(escalar), mean(.), max(.), length(.), etc. 
+
+## Tipos de datos: vector1=`r vector1` {.build .smaller}
+
+```{r}
+vector1 < 5
+sum(vector1 < 5)
+```
+  
+### listas:
+pueden tener elementos de todo tipo
+```{r}
+lista <- list(nombre="Juan", edad=35, nombrehijos=c("Juana", "Ana"))
+lista$nombre
+lista[[2]]
+```
+
+## if, for, while {.build}
+
+Quiero obtener todos los indices TRUE del vector 
+
+<center>(vector1<5)=`r (vector1<5)` </center>
+
+```{r}
+
+indicestrue <- c()
+for (i in 1:length(vector1)) {
+  if ((vector1<5)[i]) {
+    indicestrue <- c(indicestrue, i)
+  }  
+}
+indicestrue
+```
+
+Me gustaria reutilizar esto
+
+## Funciones
+
+```{r}
+IndicesTrue <- function(vector){
+  indicestrue <- c()
+  for (i in 1:length(vector)) {
+    if ((vector)[i]) {
+      indicestrue <- c(indicestrue, i)
+    }  
+  }
+  indicestrue # o return(indicestrue)
+}
+
+IndicesTrue(c(TRUE, TRUE, FALSE))
+```
+
+# Cosas de proba
+
+## Simulaciones {.smaller .build}
+
+```{r}
+sample(c(0, 1), 10, replace=TRUE)
+```
+Tirar una moneda equilibrada 10 veces
+
+```{r}
+sample(c(0, 1), 10, replace=TRUE, prob=c(0.7, 0.3))
+```
+Tirar 10 veces una moneda con probabilidad 0.3 de salir cara 
+
+```{r}
+sample(c(rep("roja", 6), rep("blanca", 3)), 6, replace=FALSE)
+```
+Sacar 6 bolitas sin reposición de una urna con 6 rojas y 3 blancas
+
+## An&aacute;lisis reproducible
+
+Si un análisis que involucra una generación aleatoria
+
+Tengo que garantizar que otra persona pueda obtener los mismos resultados
+
+```{r}
+set.seed(0906)
+sample(c(0,1),5,replace=TRUE)
+
+sample(c("BUENO","MALO"),3,replace=TRUE)
+```
+
+## Variables famosas {.smaller .build}
+
+
+Ejemplo con binomial Bi(10,1/2): 
+```{r}
+dbinom(5,10,0.5)    # puntual
+pbinom(2,10,0.5)    # acumulada
+qbinom(0.5,10,0.5)  # percentil
+rbinom(20,10,0.5)   # realizaciones del experimento
+```
+también: \*geom, \*dnbinom, \*norm, \*gamma, \*exp, etc. 
+
+## Aproximando probabilidades {.build .smaller}
+
+Quiero calcular la proba aproximada de un evento:
+
+P(evento) $\approx f_n$, con $n$ grande
+
+con $f_n$: frecuencia relativa con la que lo veo al evento en $n$ repeticiones 
+
+**EJEMPLO**:  aproximar la proba de sacar exactamente 5 caras o una cantidad par de caras en 10 tiros
+
+```{r}
+casosfavorables <- 0
+for (i in 1 : 1000) {
+  muestra <- sample(c(0, 1), 10, replace = TRUE)
+  if (sum(muestra) == 5 || (sum(muestra) %% 2) == 0) {
+    casosfavorables <- casosfavorables + 1  
+  }
+}
+casosfavorables / 1000
+```
+
+## Primer ejercicio
+
+Tiramos repetidamente una moneda sesgada con probabilidad 0.6 de salir cara (A) y 0.4 de salir ceca (E). En esta secuencia de tiros, un grupo es una secuencia consecutiva de tiros que salen del mismo lado de la moneda. Por ejemplo, los grupos de AEEEAEAEE son:
+
+<center> (A)(EEE)(A)(E)(A)(EE) </center>
+
+
+1. ¿Cuál es la probabilidad de exceder 5 grupos en 10 tiradas?
+2. ¿Cuál es la probabilidad de ver exactamente 6 grupos en 10 tiradas si se que la cantidad de grupos excede 5?
+3. ¿Cuál es el número esperado de grupos en 10 tiradas?
+
+## Segundo ejercicio
+
+Aproximar la probabilidad de ganar el juego de Monty Hall para las dos estrategias posibles: quedarse o cambiar.
+
+<center>![](doors.jpg)</center>
+
+## Gráficos {.smaller}
+
+```{r ,dev.args=list(bg= 'transparent')}
+x <- seq(-3,3,0.1)
+y <- dnorm(x)
+plot(x,y,type="l",main="Densidad de una normal estándar")
+points(rnorm(20),rep(0,20))
+```
+
+## Gráficos {.smaller}
+
+```{r, dev.args=list(bg= 'transparent')}
+h <- rbinom(10000,10,0.5)
+barplot(table(h))
+```
+
+
+## Secretary problem {.smaller }
+
+**Reglas:**
+
+- Quiero contratar una sola persona entre $n$ (conocido) candidatos.
+
+- Los candidatos son entrevistados secuencialmente en un orden al azar.
+
+- Puedo rankear a los candidatos de mejor a peor sin empates. La decisión se contratar a un candidato debe basarse s&oacute;lo en el ranking relativo de los candidatos entrevistados hasta el momento.
+
+- Un candidato rechazado no puede ser llamado ni contratado luego.
+
+- Sólo estoy contento si elijo al mejor.
+
+Si mi estrategia es descartar los primeros $r-1$ candidatos y después elegir el candidato que sea el mejor en el ranking relativo de los entrevistados hasta el momento. 
+
+1. Programar una función que dado $n$ y $p$ un porcentaje calcule la probabilidad de elegir al mejor dejando pasar aprox al  p porciento de los $n$ candidatos.
+
+2. Hacer un gráfico de la probabilidad de elegir al mejor en función del porcentaje de $n=50$.
+
+3. ¿Cómo qué porcentaje de $n=50$ debería tomar a r para maximizar la probabilidad de elegir al mejor?
+
+## &Uacute;ltimo
+
+Comparar el grafico de barras de una hipergeometrica (500,350,10) con el de una binomial con parametros (10,0.7). 
+
+
+
